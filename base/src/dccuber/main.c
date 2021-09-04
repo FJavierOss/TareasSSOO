@@ -3,7 +3,7 @@
 
 #include "../file_manager/manager.h"
 
-//   :Jack-O-Lantern:
+//  :jack_o_lantern:
 
 
 void handle_prueba( int sig, siginfo_t *siginfo, void *context)
@@ -22,47 +22,58 @@ int main(int argc, char const *argv[])
   pid_t pid;
   int status;
 
+  // Iniciacin de FABRICA
+  pid = fork();
+  
+  if (!pid){
+    printf("\nIniciando la FABRICA . . .\n[FABRICA] pid: %i - PADRE: %i\n\n", getpid(), getppid());
+
+  } else{
+    char *filename = argv[1];
+    InputFile *data_in = read_file(filename);
+
+    printf("Leyendo el archivo %s...\n", filename);
+    printf("- Lineas en archivo: %i\n", data_in->len);
+    printf("- Contenido del archivo:\n");
+
+    //printf("\t- ");
+    for (int i = 0; i < 3; i++)
+    {
+
+      char* aux = data_in->lines[0][i];
+      pid = fork();
+
+      // Este es el HIJO
+      if (pid == 0){
+        //printf("\n[HIJO] %d \n", pid);      
+        execl("./semaforo", aux, NULL);   
+      } 
+
+      // Este es el PADRE
+      printf("\n[MAIN] %d \n", pid);
+      
+      
+    }
+    //printf("\n");
+    //printf("\t- ");
+    for (int i = 0; i < 5; i++)
+    {
+      printf("%s, ", data_in->lines[1][i]);
+    }
+    printf("\n");
+    printf("Liberando memoria...\n");
+    input_file_destroy(data_in);
+
+
+
+    for( int i = 0; i < 4; i++){
+      pid = wait(&status);
+      printf("[INNIT] finalizando  - padre: %d - hijo: %d\n", getpid(), pid);
+    } 
+  }
 
   
-  char *filename = argv[1];
-  InputFile *data_in = read_file(filename);
-
-  printf("Leyendo el archivo %s...\n", filename);
-  printf("- Lineas en archivo: %i\n", data_in->len);
-  printf("- Contenido del archivo:\n");
-
-  printf("\t- ");
-  for (int i = 0; i < 3; i++)
-  {
-
-    char* aux = data_in->lines[0][i];
-    pid = fork();
-
-    // Este es el HIJO
-    if (pid == 0){
-      printf("\n[HIJO] %d \n", pid);      
-      execl("./semaforo", aux, NULL);   
-    } 
-
-    // Este es el PADRE
-    printf("\n[MAIN] %d \n", pid);
-    
-    
-  }
-  printf("\n");
-  printf("\t- ");
-  for (int i = 0; i < 5; i++)
-  {
-    printf("%s, ", data_in->lines[1][i]);
-  }
-  printf("\n");
-  printf("Liberando memoria...\n");
-  input_file_destroy(data_in);
-
-  for( int i = 0; i < 3; i++){
-    pid = wait(&status);
-    printf("finalizo INNIT - padre: %d - hijo: %d\n", getpid(), pid);
-  } 
+  
   
   return 0;
 }
