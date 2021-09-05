@@ -77,41 +77,45 @@ int main(int argc, char const *argv[])
 
     connect_sigaction(SIGUSR1, handle_prueba);
     
-    sleep(5);
+    sleep(1);
     printf("\n\n - - - > El lçvalor es:");
     printf(" %i\n", pid_fabrica);
-    
-    /*
-    int length = snprintf(NULL, 0, "%d", pid_fabrica);
-    char str[length+1];
-    snprintf(str, "%d", pid_fabrica);
 
 
-
-    int length = snprintf(NULL, 0, "%d", pid_fabrica);
-    char numero_str[length];
-    sprintf(numero_str, "%c", pid_fabrica);
-    printf("\n\nQues es esto: %c\n", numero_str);
-    */
-
-    int length_1 = snprintf(NULL, 0, "%d", pid_fabrica);
-    unsigned int numero = pid_fabrica;
+    // codigo para transformar un INT a STR
+    int length_1 = snprintf(NULL, 0, "%d", pid_fabrica); //calcula el largo del int (espacio en memoria)
+    unsigned int numero = pid_fabrica;  //  unsigned int
     char numero_str[length_1 + 1];
-    sprintf(numero_str, "%u", numero);
+    sprintf(numero_str, "%u", numero); // (espacio donde se guardara, tipo de dato, int a transformar)u es para un unsigned int
 
     printf("\n > > > > > >  > IMPRIME: %s\n", numero_str);
  
-    
+    /* Intento de crear una funcion  */          /*
+    int largo_aux = snprintf(NULL, 0, "%d", num); //calcula el largo del int (espacio en memoria)
+    unsigned int numero_aux = num;  //  unsigned int
+    char espacio_reservado[largo_aux + 1];
+    sprintf(espacio_reservado, "%u", numero_aux); // (espacio donde se guardara, tipo de dato, int a transformar)u es para un unsigned int
 
+    printf("\n > > > > > >  > Probando utilidad de la funcion\n%s", var);
+  */
 
     // Continuacion con el proceso principal      
     for (int i = 0; i < 3; i+=1)
     {
+
+      // aqui probamos el cambio de variable de int  a srt
+      int largo_aux = snprintf(NULL, 0, "%d", i); //calcula el largo del int (espacio en memoria)
+      unsigned int numero_aux = i;  //  unsigned int
+      char id_semaforo[largo_aux + 1];
+      sprintf(id_semaforo, "%u", numero_aux); // (espacio donde se guardara, tipo de dato, int a transformar)u es para un unsigned int
+
+      //printf("\n > > > > > >  > Probando utilidad de la funcion ->%s\n", id_semaforo);
+
       // Aqui el proceso main crea los procesos semaforos
       pid = fork();
       if (pid == 0){ 
         
-        execl("./semaforo", data_in->lines[0][i],numero_str, NULL); 
+        execl("./semaforo",id_semaforo, data_in->lines[0][i],numero_str, NULL); 
         
       } 
       
