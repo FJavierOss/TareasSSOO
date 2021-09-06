@@ -13,6 +13,32 @@ pid_t pid;
 int status;
 int pid_fabrica;
 
+int pid_semaforo_A = 0;
+int pid_semaforo_B = 0;
+int pid_semaforo_C = 0;
+
+
+
+int detener_procesos(int sig){
+  printf("\n[MAIN] CIERRE FORZADO -- PID: %i\n", getpid());
+  kill(pid_semaforo_A , SIGABRT);
+  kill(pid_semaforo_B , SIGABRT);
+  kill(pid_semaforo_C , SIGABRT);
+}    
+
+void guardar_pid_semaforo(int sig, siginfo_t *siginfo, void *context){
+  int valor_aux = siginfo->si_value.sival_int;
+  if (!pid_semaforo_A){
+    pid_semaforo_A = valor_aux;
+  }
+  else if (!pid_semaforo_B){
+    pid_semaforo_B = valor_aux;
+  }
+  else if (!pid_semaforo_C){
+    pid_semaforo_C = valor_aux;
+  }
+}
+
 void handle_prueba( int sig, siginfo_t *siginfo, void *context)
   {
     printf("\n > > > > > Entro a la funcion\n");
@@ -87,9 +113,12 @@ int main(int argc, char const *argv[])
     unsigned int numero = pid_fabrica;  //  unsigned int
     char numero_str[length_1 + 1];
     sprintf(numero_str, "%u", numero); // (espacio donde se guardara, tipo de dato, int a transformar)u es para un unsigned int
-
     printf("\n > > > > > >  > IMPRIME: %s\n", numero_str);
+
  
+    
+
+
     /* Intento de crear una funcion  */          /*
     int largo_aux = snprintf(NULL, 0, "%d", num); //calcula el largo del int (espacio en memoria)
     unsigned int numero_aux = num;  //  unsigned int
@@ -114,17 +143,34 @@ int main(int argc, char const *argv[])
       // Aqui el proceso main crea los procesos semaforos
       pid = fork();
       if (pid == 0){ 
-        
+        send_signal_with_int( getppid() , getpid() ); // señal que envia
         execl("./semaforo",id_semaforo, data_in->lines[0][i],numero_str, NULL); 
         
       } 
+
+
+      //=========================================================================
+      // [MAIN]: DESDE AQUI ES SOLO PROCESO MAIN
+      else{
+        //SEÑAL para finalizar todo( CTRL+C)
+        signal(SIGINT, detener_procesos);
+        // SEÑAL PARA ENVIAR EL PID DE SEMAFORO
+        connect_sigaction(SIGUSR1, guardar_pid_semaforo);
+        printf("\nLLego al sleep\n");
+        sleep(2);
+
+        
+
+
+      }
       
-    } 
-    
+    }   
    
     
     
-
+    
+    
+      
 
     for( int i = 0; i < 4; i++){
       pid = wait(&status);
