@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include "../file_manager/manager.h"
 
+void noDetenerProceso(int sig){
+  printf("\n\n . . . . . . . Pasa por repartidor pero no hace nada\n");
+}
+
 int main(int argc, char const *argv[])
 {
   // Guardamos las ubicaciones para poder utilizarlas cuando se requiera llamar
@@ -14,13 +18,12 @@ int main(int argc, char const *argv[])
   int ubicacion_s2 = atoi(argv[2]);
   int ubicacion_s3 = atoi(argv[3]);
   int ubicacion_b = atoi(argv[4]);
-  printf("\nI'm the REPARTIDOR process and my PID is: %i\n", getpid());
-  printf("Distancias: S1-%d ; S2-%d ; S3-%d ; B-%d\n",
-  ubicacion_s1, ubicacion_s2, ubicacion_s3, ubicacion_b);
+  printf("\n\nI'm the REPARTIDOR process and my PID is: %i\n", getpid());
+  printf("Distancias: S1-%d ; S2-%d ; S3-%d ; B-%d\n",ubicacion_s1, ubicacion_s2, ubicacion_s3, ubicacion_b);
 
   int repartidor_id = argv[0][0];
 
-  printf("Repartidor id %d listo para trabajar\n", repartidor_id);
+  printf("\n[REPARTIDOR] id %d listo para trabajar\n", repartidor_id);
 
   int pasos = 0;
 
@@ -30,7 +33,8 @@ int main(int argc, char const *argv[])
   int turnos_b = 0;
 
 
-  // señal para detener proceso
+  // señal SIGINT- DEBE IGNORAR
+  signal(SIGINT, noDetenerProceso);
   
   // Aqui empezamos con los turnos del repartidor
   for (int i = 0; i < ubicacion_b; i++){

@@ -27,6 +27,7 @@ int detener_procesos(int sig){
 }    
 
 void guardar_pid_semaforo(int sig, siginfo_t *siginfo, void *context){
+
   int valor_aux = siginfo->si_value.sival_int;
   if (!pid_semaforo_A){
     pid_semaforo_A = valor_aux;
@@ -41,23 +42,27 @@ void guardar_pid_semaforo(int sig, siginfo_t *siginfo, void *context){
 
 void handle_prueba( int sig, siginfo_t *siginfo, void *context)
   {
-    printf("\n > > > > > Entro a la funcion\n");
+    
     pid_fabrica = siginfo->si_value.sival_int;
-    printf("\n\n > > > > > el numero recibido es: %i\n", pid_fabrica);    
+    
   }
 
 void fabrica(int n_repartidores, char* semaforo1, char* semaforo2, char* semaforo3, char* bodega)
 {
 
+  /*
   void test_handle_repartidor(int test_info, siginfo_t *siginfo, void *context)
   {
-    printf("Hola repartidor %d\n", siginfo->si_value.sival_int);
+    printf(" - - - - - - - - - -Hola repartidor %d\n", siginfo->si_value.sival_int);
   }
+
   connect_sigaction(SIGUSR1, &test_handle_repartidor);
+  
+   */
 
   printf("\nIniciando la FABRICA . . .\n[FABRICA] pid: %i - PADRE: %i\n\n", getpid(), getppid());
-  printf("N repartidores fabrica %d\n", n_repartidores);
-  for (int j = 1; j <= n_repartidores; j++)
+  printf("repartidores fabrica %d\n", n_repartidores);
+  for (int j = 0; j < n_repartidores; j++)   // j debe ser menor estrico
   {
     char repartidor_id[2];
     sprintf(repartidor_id, "%c", j);
@@ -80,12 +85,12 @@ void fabrica(int n_repartidores, char* semaforo1, char* semaforo2, char* semafor
 
   /*printf("[Fabrica] S1-%d ; S2-%d ; S3-%d ; B-%d\n",ubicacion_s1, ubicacion_s2,
     ubicacion_s3, ubicacion_b); */
-
-  for( int i = 0; i < n_repartidores; i++){
+  printf("\n\n\n###########\nSE CAE LA FABRICA AQUI!!!!\n(antesdel for)\n###########\n\n");
+  for( int index = 0; index < n_repartidores; index++){
     pid = wait(&status);
-    printf("[INNIT] finalizando  - padre: %d - hijo: %d\n", getpid(), pid);
+    printf("\n\n*******[FABRICA] finalizando [REPARTIDOR] - padre: %d - hijo: %d\n", getpid(), pid);
   }
-
+  printf("\n\n\n###########\nSE CAE LA FABRICA AQUI!!!!\n\n###########\n\n");
 }
 
 
@@ -123,6 +128,8 @@ int main(int argc, char const *argv[])
     char * semaforo3 = data_in->lines[0][2];
     char * bodega = data_in->lines[0][3];
     printf("---\n");
+
+    send_signal_with_int( getppid() , getpid() ); // señal que envia
 
     printf("--- Numero repartidores aux integer %d\n", aux_repartidor);
     fabrica(aux_repartidor, semaforo1, semaforo2, semaforo3, bodega);
@@ -171,7 +178,8 @@ int main(int argc, char const *argv[])
       // Aqui el proceso main crea los procesos semaforos
       pid = fork();
       if (pid == 0){ 
-        send_signal_with_int( getppid() , getpid() ); // señal que envia
+        printf("\n\nEntrega el pid correcto? %i\n", getpid());
+        send_signal_with_int_2( getppid() , getpid() ); // señal que envia
         execl("./semaforo",id_semaforo, data_in->lines[0][i],numero_str, NULL); 
         
       } 
@@ -181,9 +189,9 @@ int main(int argc, char const *argv[])
       // [MAIN]: DESDE AQUI ES SOLO PROCESO MAIN
       else{
         //SEÑAL para finalizar todo( CTRL+C)
-        signal(SIGINT, &detener_procesos); 
+        //signal(SIGINT, &detener_procesos); 
         // SEÑAL PARA ENVIAR EL PID DE SEMAFORO
-        connect_sigaction(SIGUSR1, guardar_pid_semaforo);
+        connect_sigaction(SIGUSR2, guardar_pid_semaforo);
         printf("\nLLego al sleep\n");
         sleep(2);
 
@@ -191,6 +199,7 @@ int main(int argc, char const *argv[])
 
 
       }
+
       
     }   
    
@@ -202,10 +211,10 @@ int main(int argc, char const *argv[])
 
     for( int i = 0; i < 4; i++){
       pid = wait(&status);
-      printf("[INNIT] finalizando  - padre: %d - hijo: %d\n", getpid(), pid);
+      printf("\n *****[INNIT] finalizando  - padre: %d - hijo: %d\n", getpid(), pid);
     } 
 
-    
+  printf("\n\n*****[ININT]> > > FINALIZANDO MAIN ... ADIOS\n");
   }  
   
   
