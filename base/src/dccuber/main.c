@@ -46,25 +46,48 @@ void handle_prueba( int sig, siginfo_t *siginfo, void *context)
     printf("\n\n > > > > > el numero recibido es: %i\n", pid_fabrica);    
   }
 
-void fabrica(int n_repartidores)
+void fabrica(int n_repartidores, char* semaforo1, char* semaforo2, char* semaforo3, char* bodega)
 {
-  printf("\nIniciando la FABRICA . . .\n[FABRICA] pid: %i - PADRE: %i\n\n", getpid(), getppid());
-  printf("\n repartidores fabrica %d\n", n_repartidores);
-  for (int j = 0; j < n_repartidores; j++)
+
+  void test_handle_repartidor(int test_info, siginfo_t *siginfo, void *context)
   {
+    printf("Hola repartidor %d\n", siginfo->si_value.sival_int);
+  }
+  connect_sigaction(SIGUSR1, &test_handle_repartidor);
+
+  printf("\nIniciando la FABRICA . . .\n[FABRICA] pid: %i - PADRE: %i\n\n", getpid(), getppid());
+  printf("N repartidores fabrica %d\n", n_repartidores);
+  for (int j = 1; j <= n_repartidores; j++)
+  {
+    char repartidor_id[2];
+    sprintf(repartidor_id, "%c", j);
+
     pid = fork();
     if (!pid){
-      execl("./repartidor", NULL);
+      execl("./repartidor", repartidor_id, semaforo1, semaforo2, semaforo3,
+        bodega, NULL);
     }
     else {}
   }
-  
+
+  int ubicacion_s1 = atoi(semaforo1);
+  int ubicacion_s2 = atoi(semaforo2);
+  int ubicacion_s3 = atoi(semaforo3);
+  int ubicacion_b = atoi(bodega);
+
+  int auxiliar_signal = 2; // test de comunicaciones
+
+
+  /*printf("[Fabrica] S1-%d ; S2-%d ; S3-%d ; B-%d\n",ubicacion_s1, ubicacion_s2,
+    ubicacion_s3, ubicacion_b); */
+
   for( int i = 0; i < n_repartidores; i++){
-      pid = wait(&status);
-      printf("[INNIT] finalizando  - padre: %d - hijo: %d\n", getpid(), pid);
-    }
+    pid = wait(&status);
+    printf("[INNIT] finalizando  - padre: %d - hijo: %d\n", getpid(), pid);
+  }
 
 }
+
 
 int main(int argc, char const *argv[])
 { 
@@ -87,17 +110,22 @@ int main(int argc, char const *argv[])
 
 
 
-  // Iniciacion de FABRICA  
+  // Iniciacion de FABRICA
   pid = fork();
-  
-  if (!pid){
-    //int dir_fabrica = getpid() ;
 
-    send_signal_with_int( getppid() , getpid() ); // señal que envia
+  if (!pid){
 
     char * aux_string =  data_in->lines[1][1];
     int aux_repartidor = atoi(aux_string);
-    fabrica(aux_repartidor);
+
+    char * semaforo1 = data_in->lines[0][0];
+    char * semaforo2 = data_in->lines[0][1];
+    char * semaforo3 = data_in->lines[0][2];
+    char * bodega = data_in->lines[0][3];
+    printf("---\n");
+
+    printf("--- Numero repartidores aux integer %d\n", aux_repartidor);
+    fabrica(aux_repartidor, semaforo1, semaforo2, semaforo3, bodega);
 
   } else {
 
@@ -153,7 +181,7 @@ int main(int argc, char const *argv[])
       // [MAIN]: DESDE AQUI ES SOLO PROCESO MAIN
       else{
         //SEÑAL para finalizar todo( CTRL+C)
-        signal(SIGINT, detener_procesos);
+        signal(SIGINT, &detener_procesos); 
         // SEÑAL PARA ENVIAR EL PID DE SEMAFORO
         connect_sigaction(SIGUSR1, guardar_pid_semaforo);
         printf("\nLLego al sleep\n");
