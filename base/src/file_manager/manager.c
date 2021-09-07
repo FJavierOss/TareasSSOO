@@ -126,14 +126,3 @@ void send_signal_with_int(int pid, int payload)
   sigqueue(pid, SIGUSR1, sig);
 }
 
-/** Sends a SIGUSR2 signal to a process with an int payload   //desde aqui se puede borarr
- * 
- * @param pid_2: Process that will receive the signal
- * @param payload_2: Payload to send along with the signal
-*/
-void send_signal_with_int_2(int pid_2, int payload_2)
-{
-  union sigval sig_2 = {};
-  sig_2.sival_int = payload_2;
-  sigqueue(pid_2, SIGUSR2, sig_2);
-}

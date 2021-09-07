@@ -22,4 +22,4 @@ void input_file_destroy(InputFile *input_file);
 void connect_sigaction(int sig, void (*handler)(int, siginfo_t *, void *));
 void send_signal_with_int(int pid, int payload);
 
-void send_signal_with_int_2(int pid_2, int payload_2);
+
