@@ -38,17 +38,17 @@ CFLAGS=-Wunused -Wall $(OPT)
 # Matemáticas (C Math library)
 MTH=-lm
 
-LIB=$(MTH)
+LIB=$(GTK) $(MTH)
 
 ###############################################################################
 # MÓDULOS Y PROGRAMAS                                                         #
 ###############################################################################
 
 # Directorios con elementos de uso común
-COMMON=file_manager
+COMMON=file_manager data_structs
 
 # Directorios que serán compilados a un programa
-PROGRAMS=dccuber repartidor semaforo
+PROGRAMS=scheduler
 
 # Todos los directorios que contienen archivos de código
 SRCDIR=$(COMMON) $(PROGRAMS)
@@ -123,7 +123,7 @@ $(PROGRAMS): $$(filter obj/$$@/% $(foreach i, $(COMMON), obj/$(i)/%), $(OBJFILES
 ###############################################################################
 # Disclaimer:                                                                 #
 #                                                                             #
-# Deberías modificar solamente el nivel de Optimización (OPT, linea 20).      #
+# Deberías modificar solamente el nivel de Optimización (OPT, linea 13).      #
 # Modificar la Makefile si no sabes lo que está pasando o como la usamos los  #
 # ayudantes puede resultar en un perjuicio en la evaluación de tu código.     #
 ###############################################################################
