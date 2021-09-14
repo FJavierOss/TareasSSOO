@@ -2,6 +2,7 @@
 #include <string.h> // strtok, strcpy, etc.
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include "../data_structs/data_structs.h"
 #include "../file_manager/manager.h"
 
@@ -21,37 +22,52 @@ int main(int argc, char **argv)
         line[0], line[2], line[1], line[3]);
   }
   */
-  /*
+
+
   Queue* cola = queue_init();
 
-  int primero;
-  primero = 10;
+  char* s1 = "proceso1";
+  Process* p1 = process_init(1001,2, s1);
 
-  int segundo;
-  segundo = 11;
-  int tercero;
-  tercero = 23;
-  queue_insert(cola, primero);
-  queue_insert(cola, segundo);
-  queue_insert(cola, tercero);
+  char* s2 = "proceso2";
+  Process* p2 = process_init(1002,3, s2);
+
+  char* s3 = "proceso3";
+  Process* p3 = process_init(1003,2, s3);
+
+  queue_insert(cola, p1);
+  queue_insert(cola, p2);
+  queue_insert(cola, p3);
 
   queue_print(cola);
 
-  queue_destroy(cola);
-  */
 
-  pid_t pids[10];
-  int i;
-  for (i = 9; i >= 0; --i) {
-    pids[i] = fork();
-    if (pids[i] == 0) {
-      sleep(i+1);
-      _exit(0);
-    }
+  printf("Proceso: pid %d; nFabrica %d\n", cola -> first -> process -> pid,
+  cola -> first -> process  -> n_fabrica);
+  printf("Proceso: nombre %s\n", cola -> first -> process -> name);
+
+  switch (cola -> first -> process -> status) {
+    case RUNNING:
+      printf("En running\n");
+      break;
+
+    case READY:
+      printf("En ready\n");
+      break;
+
+    case WAITING:
+      printf("En waiting\n");
+      break;
+
+    case FINISHED:
+      printf("En finished\n");
+      break;
+
+    default:
+      printf("Nothing\n");
+      break;
   }
-  for (i = 9; i >= 0; --i)
-    waitpid(pids[i], NULL, 0);
-  return 0;
 
+  queue_destroy(cola);
 
 }
