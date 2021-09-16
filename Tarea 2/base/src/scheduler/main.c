@@ -91,7 +91,7 @@ int main(int argc, char **argv)
   while ((cola->fabrica_1)||(cola->fabrica_2)||(cola->fabrica_3)||(cola->fabrica_4)){
     printf("=========== # ==========\n");
     
-
+    int buscar_siguiente = 1;
     // Aqui se revisa si existe un proceso dentro de la cola de lectura que su tiempo inicio
     // sea igual al tiempo actual, y en ese caso lo agrega a la cola principal
     
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
       current = next; 
     }
     
-    sleep(1);
+    //sleep(1);
     
 
     //Se ejecuta el proceso
@@ -114,27 +114,34 @@ int main(int argc, char **argv)
 
     
     if (cola -> first){
-      printf("\n");
-      printf(">PID: %i\n", cola->first->process->pid);
+      //printf("\n");
+      //printf(">PID: %i\n", cola->first->process->pid);
       //printf(">>>\n");
 
-      current_select = cola -> first;
-      for (int contador = 0; contador < cola -> size; contador++){
-        if(current_select -> process -> status == READY){
-          current_select -> process -> status = RUNNING;
-          int n_fabrica_aux = current_select -> process -> n_fabrica;
-          current_select -> process -> quantum = get_quantum(cola, n_fabrica_aux, _q);
-          queue_move_to_first(cola, current_select -> process -> pid);
-          break;
+      if (buscar_siguiente){
+
+        current_select = cola -> first;
+        for (int contador = 0; contador < cola -> size; contador++){
+          if(current_select -> process -> status == READY){
+            current_select -> process -> status = RUNNING;
+            int n_fabrica_aux = current_select -> process -> n_fabrica;
+            current_select -> process -> quantum = get_quantum(cola, n_fabrica_aux, _q);
+            queue_move_to_first(cola, current_select -> process -> pid);
+            break;
+          }
+
+          next_select = current_select -> next;
+          current_select = next_select;
         }
-
-        next_select = current_select -> next;
-        current_select = next_select;
       }
-
-      printf("PID %d status %d \n",cola->first->process->pid, cola->first->process->status);
+      
+      //justo antes de empezar se cambia buscar_siguiente
+      buscar_siguiente = 0;
+      
+      printf("\n");
+      printf(">PID %d status %d \n",cola->first->process->pid, cola->first->process->status);
       if (cola->first->next){
-        printf("PID %d status %d \n",cola->last->process->pid, cola->last->process->status);  
+        printf("NEXT -PID %d status %d \n",cola->last->process->pid, cola->last->process->status);  
       }
       
       printf("---\n");
@@ -153,14 +160,14 @@ int main(int argc, char **argv)
           // CAMBIO DE ESTADO
           //largo del arreglo
           int largo_arreglo = (current_select -> process -> size_arreglo) - 1;
-          
+          /*
           printf("==================\n");
           printf("largo arreglo: %i\n", largo_arreglo);
           printf("posicion en arreglo: %i\n",current_select -> process -> pos_avance_arreglo);
           printf("n procesos: %i\n", current_select -> process -> arreglo[current_select -> process -> pos_avance_arreglo]);
           printf("quantum: %i\n", current_select -> process -> quantum);
           printf("==================\n\n");
-          
+          */
           //Finished
           if (current_select -> process -> pos_avance_arreglo ==  largo_arreglo 
           &&  current_select -> process -> arreglo[largo_arreglo] == 0){
@@ -170,6 +177,9 @@ int main(int argc, char **argv)
             //elimina el primer elemento de la cola
             printf("[FINALIZADO]>> pid: %i\n", current_select->process->pid);
             queue_pop(cola, current_select->process->pid);
+            
+            //se cambia calor de buscar_siguiente para continuar la busqueda
+            buscar_siguiente = 1;
             
             // se resta 1 a los elementos que se deben ejecutar
             cola -> elementos--;
@@ -211,6 +221,7 @@ int main(int argc, char **argv)
             queue_move_to_last(cola,current_select -> process -> pid );
             //printf(">> pid: %i\n", current_select->process->pid);
             
+            buscar_siguiente = 1;
           }
 
           //Ready
@@ -222,6 +233,9 @@ int main(int argc, char **argv)
             current_select -> process -> pos_avance_arreglo += 2;
             //Mueve este proceso al final de la cola
             queue_move_to_last(cola,current_select -> process ->pid );
+
+            //se cambia calor de buscar_siguiente para continuar la busqueda
+            buscar_siguiente = 1;
             
           }
 
