@@ -14,11 +14,8 @@ Process* process_init(int pid, int n_fabrica, char* nombre, int start_time, int 
   process -> status = 1;
   process -> start_time = start_time;
 
-  memcpy(process -> arreglo, arreglo, 10*4);
-  printf("@@@@@@\n");
-  for (int a=0; a<9;a++){
-    printf("%i\n", process ->arreglo[a]);
-  }
+  memcpy(process -> arreglo, arreglo, 10*4); // luego hay q hacerlo dinamnico colocando el largo del array
+ 
   process -> pos_avance_arreglo = 0;
   process -> quantum;
 

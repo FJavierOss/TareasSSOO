@@ -114,9 +114,9 @@ int main(int argc, char **argv)
 
 
   // Comienza el proceso
-  int x=0;
-  while (x<10){
-    x++;
+  
+  while (cola -> first){
+    
 
     printf("\n");
     printf(">PID: %i\n", cola->first->process->pid);
@@ -129,16 +129,11 @@ int main(int argc, char **argv)
 
     //Se ejecuta el proceso
     //int index = cola -> first -> process -> pos_avance_arreglo;
-    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>IMPRIME EL PUTO ARRAY\n");
-    for (int i = 0; i < 9; i++){
-      printf("%i\n",cola -> first -> process -> arreglo[i]);
-    }
 
     
     while (1){
     
-      printf(">>>\n");
-      printf("### n procesos: %i\n", cola -> first -> process -> arreglo[cola -> first -> process -> pos_avance_arreglo]);
+      //printf(">>>\n");
 
       cola -> first -> process -> arreglo[cola -> first -> process -> pos_avance_arreglo]--;
       cola -> first -> process -> quantum--;  
@@ -149,23 +144,24 @@ int main(int argc, char **argv)
 
       //largo del arreglo
       int largo_arreglo = sizeof(cola -> first -> process -> arreglo)/sizeof(cola -> first -> process -> arreglo[0])-1;
-
+      /*
       printf("==================\n");
       printf("largo arreglo: %i\n", largo_arreglo);
       printf("posicion en arreglo: %i\n",cola -> first -> process -> pos_avance_arreglo);
       printf("n procesos: %i\n", cola -> first -> process -> arreglo[cola -> first -> process -> pos_avance_arreglo]);
       printf("quantum: %i\n", cola -> first -> process -> quantum);
       printf("==================\n\n");
-
+      */
       //Finished
       if (cola -> first -> process -> pos_avance_arreglo ==  largo_arreglo 
       &&  cola -> first -> process -> arreglo[largo_arreglo] == 0){
 
-        printf("Status cambia a FINISHED\n");
+        //printf("Status cambia a FINISHED\n");
         cola -> first -> process -> status = 3;
         //elimina el primer elemento de la cola
-        queue_pop(cola);
         printf("[FINALIZADO]>> pid: %i\n", cola -> first->process->pid);
+        queue_pop(cola);
+        
         break;
       }  
 
@@ -178,7 +174,7 @@ int main(int argc, char **argv)
         cola -> first -> process -> pos_avance_arreglo++;
         //Mueve este proceso al final de la cola
         queue_move_to_last(cola,cola -> first -> process ->pid );
-        printf(">> pid: %i\n", cola -> first->process->pid);
+        //printf(">> pid: %i\n", cola -> first->process->pid);
         break;
       }
 
@@ -191,7 +187,7 @@ int main(int argc, char **argv)
         cola -> first -> process -> pos_avance_arreglo++;
         //Mueve este proceso al final de la cola
         queue_move_to_last(cola,cola -> first -> process ->pid );
-        printf(">> pid: %i\n", cola -> first->process->pid);
+        //printf(">> pid: %i\n", cola -> first->process->pid);
         break;
       }
 
@@ -210,7 +206,7 @@ int main(int argc, char **argv)
 
 
 
-
+/*
   printf("Proceso: pid %d; nFabrica %d\n", cola -> first -> process -> pid,
   cola -> first -> process  -> n_fabrica);
   printf("Proceso: nombre %s\n", cola -> first -> process -> name);
@@ -237,7 +233,7 @@ int main(int argc, char **argv)
       printf("Nothing\n");
       break;
   }
-
+*/
   queue_destroy(cola);
 
 }
