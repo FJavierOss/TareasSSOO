@@ -11,6 +11,10 @@ typedef struct process{
   int pid;
   int n_fabrica;
   char name[256];
+  int start_time;
+  int arreglo[9];
+  int pos_avance_arreglo;
+  int quantum;
   ProcessStatus status;
 } Process;
 
@@ -35,7 +39,7 @@ typedef struct queue
 } Queue;
 
 
-Process* process_init(int pid, int n_fabrica, char* nombre);
+Process* process_init(int pid, int n_fabrica, char* nombre, int start_time, int arreglo[]);
 
 Queue* queue_init();
 
