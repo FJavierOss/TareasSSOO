@@ -57,8 +57,8 @@ int main(int argc, char **argv)
 
   char* s1 = "proceso1";
   
-  int arreglo[9] = {10, 4, 30, 3, 40, 2, 50, 1, 10};
-  int arreglo_2[9] = {5, 4, 30, 3, 40, 2, 50, 1, 10};
+  int arreglo[9] = {1,2,3,4,1,1,1,1,2};
+  int arreglo_2[9] = {1,2,3,4,2,1,1,1,3};
  
   Process* p1 = process_init(1001,2, s1, 5, arreglo);
   
@@ -115,8 +115,10 @@ int main(int argc, char **argv)
 
   // Comienza el proceso
   int x=0;
-  while (x<3){
+  while (x<10){
     x++;
+
+    printf("\n");
     printf(">PID: %i\n", cola->first->process->pid);
     // Se elige a un proceso para running
     cola -> first -> process -> status = 1;
@@ -126,56 +128,78 @@ int main(int argc, char **argv)
     cola -> first -> process -> quantum = get_quantum(cola, n_fabrica_aux, _q);
 
     //Se ejecuta el proceso
-    int index = cola -> first -> process -> pos_avance_arreglo;
+    //int index = cola -> first -> process -> pos_avance_arreglo;
+    printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>IMPRIME EL PUTO ARRAY\n");
+    for (int i = 0; i < 9; i++){
+      printf("%i\n",cola -> first -> process -> arreglo[i]);
+    }
+
     
-    while ((cola -> first -> process -> quantum > 0) && 
-    (cola -> first -> process -> arreglo[index] > 0)){
+    while (1){
     
       printf(">>>\n");
-      cola -> first -> process -> arreglo[index]--;
+      printf("### n procesos: %i\n", cola -> first -> process -> arreglo[cola -> first -> process -> pos_avance_arreglo]);
+
+      cola -> first -> process -> arreglo[cola -> first -> process -> pos_avance_arreglo]--;
       cola -> first -> process -> quantum--;  
   
     
     
-    // CAMBIO DE ESTADO
+      // CAMBIO DE ESTADO
 
-    //largo del arreglo
-    int largo_arreglo = sizeof(arreglo)/sizeof(arreglo[0])-1;
+      //largo del arreglo
+      int largo_arreglo = sizeof(cola -> first -> process -> arreglo)/sizeof(cola -> first -> process -> arreglo[0])-1;
 
-    //Finished
-    if (index ==  largo_arreglo && arreglo[largo_arreglo] == 0){
-      printf("Status cambia a FINISHED\n");
-      cola -> first -> process -> status = 3;
-      //elimina el primer elemento de la cola
-      queue_pop(cola);
-      printf(">> pid: %i\n", cola -> first->process->pid);
-      break;
-    }  
+      printf("==================\n");
+      printf("largo arreglo: %i\n", largo_arreglo);
+      printf("posicion en arreglo: %i\n",cola -> first -> process -> pos_avance_arreglo);
+      printf("n procesos: %i\n", cola -> first -> process -> arreglo[cola -> first -> process -> pos_avance_arreglo]);
+      printf("quantum: %i\n", cola -> first -> process -> quantum);
+      printf("==================\n\n");
 
-    //Waiting
-    else if (cola -> first -> process -> arreglo[index] == 0){
-      printf("Status cambia a Waiting\n");
-      cola -> first -> process -> status = 2;
-      //Mueve este proceso al final de la cola
-      queue_move_to_last(cola,cola -> first -> process ->pid );
-      printf(">> pid: %i\n", cola -> first->process->pid);
-      break;
-    }
+      //Finished
+      if (cola -> first -> process -> pos_avance_arreglo ==  largo_arreglo 
+      &&  cola -> first -> process -> arreglo[largo_arreglo] == 0){
 
-    //Ready
-    else if (cola -> first -> process -> quantum == 0){
-      printf("Status cambia a Ready\n");
-      cola -> first -> process -> status = 1;
-      //Mueve este proceso al final de la cola
-      queue_move_to_last(cola,cola -> first -> process ->pid );
-      printf(">> pid: %i\n", cola -> first->process->pid);
-      break;
-    }
+        printf("Status cambia a FINISHED\n");
+        cola -> first -> process -> status = 3;
+        //elimina el primer elemento de la cola
+        queue_pop(cola);
+        printf("[FINALIZADO]>> pid: %i\n", cola -> first->process->pid);
+        break;
+      }  
 
-    //Running
-    else {
-      printf("Sigue en RUNNING\n");
-    }
+      //Waiting
+      else if (cola -> first -> process -> arreglo[cola -> first -> process -> pos_avance_arreglo] == 0){
+        printf("Status cambia a Waiting\n");
+        cola -> first -> process -> status = 2;
+
+        //se suma 1 al la posicion de avance del arreglo
+        cola -> first -> process -> pos_avance_arreglo++;
+        //Mueve este proceso al final de la cola
+        queue_move_to_last(cola,cola -> first -> process ->pid );
+        printf(">> pid: %i\n", cola -> first->process->pid);
+        break;
+      }
+
+      //Ready
+      else if (cola -> first -> process -> quantum == 0){
+        printf("Status cambia a Ready\n");
+        cola -> first -> process -> status = 1;
+
+        //se suma 1 al la posicion de avance del arreglo
+        cola -> first -> process -> pos_avance_arreglo++;
+        //Mueve este proceso al final de la cola
+        queue_move_to_last(cola,cola -> first -> process ->pid );
+        printf(">> pid: %i\n", cola -> first->process->pid);
+        break;
+      }
+
+      //Running
+      else {
+        printf("Sigue en RUNNING\n");
+        
+      }
 
   }
 
