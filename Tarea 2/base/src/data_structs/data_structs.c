@@ -19,6 +19,12 @@ Process* process_init(int pid, int n_fabrica, char* nombre,
   process -> arreglo = arreglo;
   process -> size_arreglo = size_arreglo;
 
+  process -> cpu_times = 0;
+  process -> quantum_times = 0;
+  process -> turnaround_times = 0;
+  process -> response_time = 0;
+  process -> waiting_time = 0;
+
   return process;
 }
 
