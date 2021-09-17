@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 
 
   //Valor por defecto de Q
-  int _q = 20;
+  int _q = 2;
 
 
 
@@ -89,6 +89,7 @@ int main(int argc, char **argv)
 
 
   int tiempo = 0;
+  int cpu_running = 0;
   Node* current;
   Node* next;
   Node* current_select;
@@ -147,6 +148,8 @@ int main(int argc, char **argv)
         for (int contador = 0; contador < cola -> size; contador++){
           if(current_select -> process -> status == READY){
             current_select -> process -> status = RUNNING;
+            printf("[t = %d] El proceso %s con pid %d ha pasado de READY a RUNNING.\n",
+              tiempo, current_select -> process -> name, current_select -> process -> pid);
             int n_fabrica_aux = current_select -> process -> n_fabrica;
             current_select -> process -> quantum = get_quantum(cola, n_fabrica_aux, _q);
             queue_move_to_first(cola, current_select -> process -> pid);
@@ -196,7 +199,9 @@ int main(int argc, char **argv)
               current_select ->process -> arreglo[(current_select -> process -> pos_avance_arreglo)-1]--;
             } else {
               // waiting ya espero lo suficiente, pasa a READY
-              printf("Cambio de waiting a Ready pid %d\n", current_select -> process -> pid);
+              printf("[t = %d] El proceso %s con pid %d ha pasado de WAITING a READY.\n",
+              tiempo, current_select -> process -> name, current_select -> process -> pid);
+              
               buscar_siguiente = 1;
               current_select -> process -> status = READY;
             }
@@ -223,7 +228,7 @@ int main(int argc, char **argv)
             printf("Quantum WAITING %i\n", current_select -> process ->quantum);
           }else {
             printf("arreglo %d \n", current_select -> process -> arreglo[current_select -> process -> pos_avance_arreglo]);
-            printf("Quantum RUNNING %i\n", current_select -> process ->quantum);
+            printf(">Quantum:  %i\n", current_select -> process ->quantum);
           }
 
 
@@ -234,9 +239,16 @@ int main(int argc, char **argv)
             //printf("Status cambia a FINISHED\n");
             current_select -> process -> status = 3;
             //elimina el primer elemento de la cola
-            printf("[FINALIZADO]>> pid: %i\n", current_select->process->pid);
+
+
+
+            
+              
+           
             next = current_select -> next;
             p1 = queue_pop(cola, current_select->process->pid);
+            printf("[t = %d] El proceso %s con pid %d ha pasado FINISHED.\n",
+              tiempo, p1 -> name, p1 -> pid);
             current_select = next;
             //se cambia calor de buscar_siguiente para continuar la busqueda
             buscar_siguiente = 1;
@@ -273,7 +285,8 @@ int main(int argc, char **argv)
 
           // running ->  waiting
           else if (current_select -> process -> arreglo[current_select -> process -> pos_avance_arreglo] == 0){
-            printf("Status cambia a Waiting\n");
+            printf("[t = %d] El proceso %s con pid %d ha pasado de RUNNING a WAITING.\n",
+              tiempo, current_select -> process -> name, current_select -> process -> pid);
             current_select -> process -> status = 2;
 
 
@@ -298,7 +311,8 @@ int main(int argc, char **argv)
           else if ((current_select -> process -> quantum == 0) && (current_select->process->status == RUNNING)){
             
             
-            printf("Status cambia a Ready\n");
+            printf("[t = %d] El proceso %s con pid %d ha pasado de RUNNING a READY.\n",
+              tiempo, current_select -> process -> name, current_select -> process -> pid);
             current_select -> process -> status = 1;
             //se suma 2 al la posicion de avance del arreglo, asi se salta el espacio de "descanzo"
             //current_select -> process -> pos_avance_arreglo += 2;
@@ -319,17 +333,22 @@ int main(int argc, char **argv)
             next_select = current_select -> next;
             current_select = next_select;
 
-          //Waiting -> READY
+          //READY -> READY
           }
           else if (current_select->process -> status == READY){
-            printf("Sigue en READY\n");
+            printf("READY ---> READY\n");
+            printf(">QUANTUM: %i de PID: %i\n", current_select ->process -> quantum, current_select ->process ->pid);
             next_select = current_select -> next;
             current_select = next_select;
           }
 
           //running -> Running
           else {
-            printf("Sigue en RUNNING\n");
+            printf("RUINNING ---> RUNNING\n");
+            printf(">QUANTUM: %i de PID: %i\n", current_select ->process -> quantum, current_select ->process ->pid);
+            printf(">CPU: %i de PID: %i\n", current_select ->process -> arreglo[current_select ->process -> pos_avance_arreglo], current_select ->process ->pid);
+
+            cpu_running = 1;
             next_select = current_select -> next;
             current_select = next_select;
 
@@ -362,6 +381,7 @@ int main(int argc, char **argv)
     if (tiempo >= current -> process -> start_time){    // TIEMPO debe ser menor o igual
       lista_pid[contador] = current->process->pid;
       lista_n_fabrica[contador] = current->process->n_fabrica;
+
       //lista_name[contador] = current->process->name;
 
       pid_para_agregar = current->process->pid;
@@ -376,8 +396,9 @@ int main(int argc, char **argv)
     printf("size cola lectura antes %d\n", cola_lectura->size);
     p1 = queue_pop(cola_lectura, pid_para_agregar);
     printf("size cola lectura despues %d\n", cola_lectura->size);
-
+    printf("[t = %d] El proceso %s ha sido creado con pid %d.\n", tiempo, p1 -> name, p1 -> pid);
     queue_insert(cola, p1);
+    
     queue_print(cola_lectura);
     printf("###########################################################################################################################################################################################\n\n");
     //break;
@@ -408,8 +429,9 @@ int main(int argc, char **argv)
       printf("size cola lectura antes %d\n", cola_lectura->size);
       p1 = queue_pop(cola_lectura, pid_para_agregar);
       printf("size cola lectura despues %d\n", cola_lectura->size);
-
+      printf("[t = %d] El proceso %s ha sido creado con pid %d.\n", tiempo, p1 -> name, p1 -> pid);
       queue_insert(cola, p1);
+      
       queue_print(cola_lectura);
       printf("###########################################################################################################################################################################################\n\n");
       //break;
@@ -459,7 +481,10 @@ int main(int argc, char **argv)
 
   // justo antes de que se reinicie el ciclo se retorna el valor original  
   // tiempo de prioridad
-  
+  if (!cpu_running){
+    printf("[t = %d] No hay ningún proceso ejecutando en la CPU\n", tiempo);
+  }
+  cpu_running = 0;
   tiempo ++;
   }
 

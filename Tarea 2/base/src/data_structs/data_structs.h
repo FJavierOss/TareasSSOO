@@ -16,6 +16,11 @@ typedef struct process{
   int size_arreglo;
   int pos_avance_arreglo;
   int quantum;
+  int cpu_times; //
+  int quantum_times; //
+  int turnaround_times; //
+  int response_time; //
+  int waiting_time; //
   ProcessStatus status;
 } Process;
 
