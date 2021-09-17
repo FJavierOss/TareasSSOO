@@ -203,6 +203,65 @@ Process* queue_pop(Queue* queue, int pid)
 }
 
 
+/** Devuelve el p con el match de la cola y retorna el proceso correspondiente*/
+Process* info_pop(Queue* queue, int pid)
+{
+
+  if (queue -> first){
+
+      Node* current = queue -> first;
+      Node* parent = current;
+      int continua = 1;
+      printf("Test 1 ------");
+      printf("%d\n", queue->size);
+
+      // Aqui se evalua el caso en que el primer elemento de la cola necesita
+      // sacarse
+      if(current->process->pid == pid){
+        printf("Test 2 ------");
+        //printf("Entra test 1\n");
+        Process* process = current -> process;
+        return process;
+        continua = 0;
+      }
+
+      // Se recorren todos los nodos buscando un valor que haga match
+      // Este while no considera el ultimo nodo
+      while ((current -> next)&&(continua)){
+
+        // Aqui si es que un valor hace match, entonces se extrae el nodo
+        // y se agrega al final de la cola, esto se hace con redefinicion de punteros
+        if(current->process->pid == pid){
+          //printf("Entra test 2\n");          
+          Process* process = current -> process;
+          return process;
+        }
+        if (continua){
+          //printf("Entra test 3\n");
+          parent = current;
+          Node* next = current -> next;
+          current = next;
+        }
+      }
+
+      // Se chequea el último nodo
+      if (current -> process -> pid == pid){
+        //printf("Entra test 4\n");
+        Process* process = current -> process;
+        return process;
+      } else {
+        // Si es que no se encontro el pid en ningun nodo
+        return NULL;
+      }
+
+  // Este es el caso si la queue estaba vacia
+  } else {
+    return NULL;
+  }
+
+}
+
+
 /** Libera la cola con todos sus nodos */
 void queue_destroy(Queue* queue)
 {

@@ -62,6 +62,8 @@ void queue_move_to_first(Queue* queue, int pid);
 
 Process* queue_pop(Queue* queue, int pid);
 
+Process* info_pop(Queue* queue, int pid);
+
 void queue_destroy(Queue* queue);
 
 void queue_print(Queue* queue);

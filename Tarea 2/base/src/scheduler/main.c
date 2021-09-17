@@ -11,6 +11,14 @@ int main(int argc, char **argv)
 {
   printf("Hello T2!\n");
   // Inicializamos la cola de lectura
+ /*
+  char letra[3] = "a";
+  char letra_2[3] = "f";
+  int algo[3] ={letra,letra_2,"s"} ;
+  printf("> %s\n", algo[1]);
+  printf("Ya paso lo que queri probar\n");
+  sleep(10);
+*/
   Queue* cola_lectura = queue_init();
   Queue* cola = queue_init();
 
@@ -89,6 +97,7 @@ int main(int argc, char **argv)
 
   // Comienza el proceso
   int buscar_siguiente = 1;
+  
   while ((cola->fabrica_1)||(cola->fabrica_2)||(cola->fabrica_3)||(cola->fabrica_4)){
     printf("=========== # ==========\n");
 
@@ -98,20 +107,24 @@ int main(int argc, char **argv)
 
     current = cola_lectura -> first;
     queue_print(cola_lectura);
-    for (int contador = 0; contador < cola_lectura -> size; contador++){
-      if (tiempo == current -> process -> start_time){
-        printf("size cola lectura antes %d\n", cola_lectura->size);
-        p1 = queue_pop(cola_lectura, current -> process -> pid);
-        printf("size cola lectura despues %d\n", cola_lectura->size);
+/*
+    if (prioridad_de_llegada == 3){
+      for (int contador = 0; contador < cola_lectura -> size; contador++){
+        if (tiempo == current -> process -> start_time){
+          printf("size cola lectura antes %d\n", cola_lectura->size);
+          p1 = queue_pop(cola_lectura, current -> process -> pid);
+          printf("size cola lectura despues %d\n", cola_lectura->size);
 
-        queue_insert(cola, p1);
-        queue_print(cola_lectura);
-        printf("###########################################################################################################################################################################################\n\n");
-        break;
+          queue_insert(cola, p1);
+          queue_print(cola_lectura);
+          printf("###########################################################################################################################################################################################\n\n");
+          break;
+        }
+        next = current -> next;
+        current = next;
       }
-      next = current -> next;
-      current = next;
     }
+ */   
 
     //sleep(1);
 
@@ -121,9 +134,7 @@ int main(int argc, char **argv)
 
 
     if (cola -> first){
-      //printf("\n");
-      //printf(">PID: %i\n", cola->first->process->pid);
-      //printf(">>>\n");
+
 
       if (buscar_siguiente){
         printf("############################################################\n\n");
@@ -147,6 +158,7 @@ int main(int argc, char **argv)
         }
         }
       }
+
 
       //justo antes de empezar se cambia buscar_siguiente
       buscar_siguiente = 0;
@@ -267,6 +279,7 @@ int main(int argc, char **argv)
 
             //se suma 1 al la posicion de avance del arreglo
             current_select -> process -> pos_avance_arreglo += 2;
+        
             //Mueve este proceso al final de la cola
             next_select = current_select -> next;
             queue_move_to_last(cola,current_select -> process -> pid );
@@ -275,15 +288,18 @@ int main(int argc, char **argv)
             buscar_siguiente = 1;
             printf(">>cambio variable buscar sgtre %d\n", contador);
             printf(">>cambio variable buscar sgtre %d\n", buscar_siguiente);
+            
+
 
 
           }
 
           //running -> Ready
           else if ((current_select -> process -> quantum == 0) && (current_select->process->status == RUNNING)){
+            
+            
             printf("Status cambia a Ready\n");
             current_select -> process -> status = 1;
-
             //se suma 2 al la posicion de avance del arreglo, asi se salta el espacio de "descanzo"
             //current_select -> process -> pos_avance_arreglo += 2;
             next_select = current_select -> next;
@@ -292,6 +308,8 @@ int main(int argc, char **argv)
             current_select = next_select;
             //se cambia calor de buscar_siguiente para continuar la busqueda
             buscar_siguiente = 1;
+            
+            
 
 
           //Waiting -> Waiting
@@ -333,6 +351,115 @@ int main(int argc, char **argv)
 
   }
 
+
+  
+  int lista_pid[8];
+  int lista_n_fabrica[8];
+  //const char *lista_name[8];
+  int desempate = 0;
+  int pid_para_agregar;
+  for (int contador = 0; contador < cola_lectura -> size; contador++){
+    if (tiempo >= current -> process -> start_time){    // TIEMPO debe ser menor o igual
+      lista_pid[contador] = current->process->pid;
+      lista_n_fabrica[contador] = current->process->n_fabrica;
+      //lista_name[contador] = current->process->name;
+
+      pid_para_agregar = current->process->pid;
+      desempate++;
+    }
+    next = current -> next;
+    current = next;
+  }
+
+  // si no hay desempate seguimos el proceso habitual
+  if (desempate == 1 ){
+    printf("size cola lectura antes %d\n", cola_lectura->size);
+    p1 = queue_pop(cola_lectura, pid_para_agregar);
+    printf("size cola lectura despues %d\n", cola_lectura->size);
+
+    queue_insert(cola, p1);
+    queue_print(cola_lectura);
+    printf("###########################################################################################################################################################################################\n\n");
+    //break;
+  }
+  else{
+    // SI entro aqui quiere decir que hay más de un proceso que quiere entrar
+
+    //Desempate por menor numero de fabrica
+    int que_fabrica = 5; // se asume un maximo de 4 fabricas
+    int desempate_2 = 0;
+    
+    int ultima_list_desesmpate[8];
+    int count_2 = 0;
+
+    for (int index = 0; index < desempate; index++){
+      int aux = lista_n_fabrica[index];
+      if (aux < que_fabrica){
+        que_fabrica = aux;
+        pid_para_agregar = lista_pid[index];
+        ultima_list_desesmpate[index] = lista_pid[index];
+        count_2++;
+        desempate_2++;
+      }
+    }
+
+    //si hay 1 con menor numeor de fabrica      
+    if (desempate_2 == 1){
+      printf("size cola lectura antes %d\n", cola_lectura->size);
+      p1 = queue_pop(cola_lectura, pid_para_agregar);
+      printf("size cola lectura despues %d\n", cola_lectura->size);
+
+      queue_insert(cola, p1);
+      queue_print(cola_lectura);
+      printf("###########################################################################################################################################################################################\n\n");
+      //break;
+    }
+
+    /*else{
+      // si estamo aca es porque aun no hay desempate
+      //char nombre_mas_corto[256];
+      int var_aux;
+      Process* pro_1 = info_pop(cola_lectura,ultima_list_desesmpate[0]);
+      printf("---%d", pro_1 -> pid);
+      
+      
+
+      for (int indice = 0; indice < desempate_2 - 1 ; indice++){
+        Process* pro_2 = info_pop(cola_lectura, ultima_list_desesmpate[indice + 1]);        
+        int aux_1 = strcmp(pro_1->name,pro_2 -> name);
+        if (aux_1 > 0){
+          // si el resultado es +, pro_1 es menor
+          var_aux = pro_1->pid;
+
+        }   
+        else{
+          var_aux = pro_2->pid;
+        }      
+      }
+        //ya tengo el nombre mas corto
+      for (int num = 0 ; num < desempate_2 ; num++){
+        if (   1){
+          // ahora se procede a agregarlo a la cola
+          printf("size cola lectura antes %d\n", cola_lectura->size);
+          p1 = queue_pop(cola_lectura, lista_pid[num]);
+          printf("size cola lectura despues %d\n", cola_lectura->size);
+
+          queue_insert(cola, p1);
+          queue_print(cola_lectura);
+          printf("###########################################################################################################################################################################################\n\n");
+          break;
+
+
+          }
+        }
+    } */
+  }
+    
+  
+
+  // justo antes de que se reinicie el ciclo se retorna el valor original  
+  // tiempo de prioridad
+  
   tiempo ++;
   }
 
