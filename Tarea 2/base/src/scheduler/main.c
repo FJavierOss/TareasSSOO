@@ -16,7 +16,7 @@ int main(int argc, char **argv)
   Queue* cola = queue_init();
   Process* aux_init;
 
-  InputFile *file = read_file("input.txt");
+  InputFile *file = read_file(argv[1]);
 
   int numero_de_procesos = file->len;
   cola -> elementos = numero_de_procesos;
@@ -87,10 +87,11 @@ int main(int argc, char **argv)
 
     // Aqui se revisa si existe un proceso dentro de la cola de lectura que su tiempo inicio
     // sea igual al tiempo actual, y en ese caso lo agrega a la cola principal
-
+    //printf("20\n");
     current = cola_lectura -> first;
     //queue_print(cola_lectura);
     for (int contador = 0; contador < cola_lectura -> size; contador++){
+      //printf("21\n");
       if (tiempo == current -> process -> start_time){
         p1 = queue_pop(cola_lectura, current -> process -> pid);
         queue_insert(cola, p1);
@@ -102,14 +103,24 @@ int main(int argc, char **argv)
     }
 
     if (cola -> first){
+      //printf("22\n");
 
       if (buscar_siguiente){
+        //printf("23\n");
         current_select = cola -> first;
         if (current_select -> process -> status == RUNNING){
+          //printf("24\n");
           buscar_siguiente = 0;
         } else {
+          //printf("25\n");
         for (int contador = 0; contador < cola -> size; contador++){
+          //printf("26\n");
           if(current_select -> process -> status == READY){
+            if (current_select -> next){
+              //printf("successSSS\n");
+            } else {
+              //printf("DoomMM\n");
+            }
             current_select -> process -> status = RUNNING;
             printf("[t = %d] El proceso %s con pid %d ha pasado de READY a RUNNING.\n",
               tiempo, current_select -> process -> name, current_select -> process -> pid);
@@ -121,15 +132,28 @@ int main(int argc, char **argv)
             }
             int n_fabrica_aux = current_select -> process -> n_fabrica;
             current_select -> process -> quantum = get_quantum(cola, n_fabrica_aux, _q);
+            //printf("123\n");
             queue_move_to_first(cola, current_select -> process -> pid);
+            //printf("123\n");
+            /*
+            if (current_select -> next){
+              printf("success\n");
+            } else {
+              printf("Doom\n");
+            }*/
             break;
           }
-          next_select = current_select -> next;
-          current_select = next_select;
+
+          if (current_select -> next){
+            next_select = current_select -> next;
+            current_select = next_select;
+          } else {
+            //printf("Doom10\n");
+          }
         }
         }
       }
-
+      //printf("1\n");
       //justo antes de empezar se cambia buscar_siguiente
       buscar_siguiente = 0;
       /*
@@ -147,8 +171,10 @@ int main(int argc, char **argv)
       cola -> first -> process -> quantum--;
       //resta el tiempo dedicado a los waiting y al running de la lista completa
       current_select = cola -> first;
+      //printf("2\n");
 
       for (int contador = 0; contador < cola -> size; contador++){
+        //printf("3\n");
 
         /*
         printf("Cola size %d\n", cola -> size);
@@ -157,7 +183,7 @@ int main(int argc, char **argv)
         printf("Posicion: %i\n", current_select -> process ->pos_avance_arreglo);
         */
         if((current_select -> process -> status == RUNNING)||(current_select -> process -> status == WAITING)){
-
+          //printf("4\n");
           if(current_select -> process -> status == WAITING){
             // se descuernta tiempo de waiting
             if(current_select ->process -> arreglo[(current_select -> process -> pos_avance_arreglo)-1] >0){
@@ -171,6 +197,7 @@ int main(int argc, char **argv)
             }
 
           } else {
+            //printf("5\n");
             current_select ->process -> arreglo[current_select -> process -> pos_avance_arreglo]--;
           }
 
@@ -178,6 +205,7 @@ int main(int argc, char **argv)
           // CAMBIO DE ESTADO
           //largo del arreglo
           int largo_arreglo = (current_select -> process -> size_arreglo)-1;
+          //printf("6\n");
           /*
           printf("==================\n");
           printf("largo arreglo: %i\n", largo_arreglo);
@@ -201,6 +229,7 @@ int main(int argc, char **argv)
           //running -> Finished
           if (current_select -> process -> pos_avance_arreglo ==  largo_arreglo
           &&  current_select -> process -> arreglo[largo_arreglo] == 0){
+            //printf("7\n");
 
             current_select -> process -> status = 3;
             next = current_select -> next;
@@ -281,10 +310,29 @@ int main(int argc, char **argv)
 
             //se suma 2 al la posicion de avance del arreglo, asi se salta el espacio de "descanzo"
             //current_select -> process -> pos_avance_arreglo += 2;
-            next_select = current_select -> next;
+            if (current_select -> next){
+              //printf("SUCCESS\n");
+              next_select = current_select -> next;
+              //printf("CONTADOR %d\n", contador);
+            } else {
+              //printf("DOOMMMM\n");
+              //printf("CONTADOR %d\n", contador);
+            }
+
             //Mueve este proceso al final de la cola
+            //printf("-------------\n");
+            //queue_print(cola);
             queue_move_to_last(cola,current_select -> process ->pid );
-            current_select = next_select;
+            //queue_print(cola);
+            //printf("/////////////\n");
+
+
+            if (current_select -> next){
+              current_select = next_select;
+              //printf("SUCCESS1000\n");
+            } else {
+              //printf("DOOMMMM1000\n");
+            }
             //se cambia calor de buscar_siguiente para continuar la busqueda
             buscar_siguiente = 1;
 
@@ -292,6 +340,7 @@ int main(int argc, char **argv)
           //Waiting -> Waiting
           }
           else if (current_select->process -> status == WAITING){
+            //printf("8\n");
             //printf("Sigue en WAITING\n");
             current_select -> process -> waiting_time ++;
             next_select = current_select -> next;
@@ -300,6 +349,7 @@ int main(int argc, char **argv)
           //Waiting -> READY
           }
           else if (current_select->process -> status == READY){
+            //printf("9\n");
             //printf("Sigue en READY\n");
             current_select -> process -> waiting_time ++;
             next_select = current_select -> next;
@@ -308,15 +358,24 @@ int main(int argc, char **argv)
 
           //running -> Running
           else {
+            //printf("10\n");
             //printf("Sigue en RUNNING\n");
             cpu_running = 1;
             next_select = current_select -> next;
+            if (current_select -> next){
+              //printf("111\n");
+            }
+            else{
+              //printf("122\n");
+              //printf("contador %d \n",contador);
+            }
             current_select = next_select;
 
           }
 
 
         } else {
+          //printf("11\n");
           //printf("Estoy en READY ESPERANDO - bs: %d\n", buscar_siguiente);
           current_select -> process -> waiting_time ++;
           next_select = current_select -> next;
@@ -331,6 +390,12 @@ int main(int argc, char **argv)
   }
   cpu_running = 0;
   tiempo ++;
+  /*
+  if (cola -> first){
+    printf("pid first %d\n", cola -> first -> process -> pid);
+    printf("pid last %d\n", cola -> last -> process -> pid);
+  }*/
+
   }
 
 
@@ -342,7 +407,7 @@ int main(int argc, char **argv)
   queue_destroy(cola);
   queue_destroy(cola_lectura);
 
-  FILE *file_to_write = fopen("statistics.csv", "w");
+  FILE *file_to_write = fopen(argv[2], "w");
   Node* current_escritura;
   Process* p_e;
   current_escritura = cola_escritura -> first;

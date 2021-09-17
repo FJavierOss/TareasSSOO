@@ -63,6 +63,8 @@ void queue_insert(Queue* queue, Process* process);
 
 void queue_move_to_last(Queue* queue, int value);
 
+//Process* info_pop(Queue* queue, int pid);
+
 void queue_move_to_first(Queue* queue, int pid);
 
 Process* queue_pop(Queue* queue, int pid);
