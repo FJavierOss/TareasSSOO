@@ -31,7 +31,7 @@ Queue* queue_init()
   queue -> last = NULL;
   queue -> elementos = 0;
   queue -> size = 0;
-  
+
   queue -> fabrica_1 = 0;
   queue -> fabrica_2 = 0;
   queue -> fabrica_3 = 0;
@@ -121,72 +121,85 @@ void queue_move_to_first(Queue* queue, int pid){
       current -> next = queue -> first;
       queue -> first = current;
     }
-  } 
+  }
 }
 
 /** Elimina el nodo con el match de la cola y retorna el proceso correspondiente*/
 Process* queue_pop(Queue* queue, int pid)
 {
 
-  Node* current = queue -> first;
-  Node* parent = current;
-  int continua = 1;
+  if (queue -> first){
 
-  // Aqui se evalua el caso en que el primer elemento de la cola necesita
-  // sacarse
-  if(current->process->pid == pid){
-    if (current -> next){
-      Node* hijo = current -> next;
-      queue -> first = hijo;
-      current -> next = NULL;
-      Process* process = current -> process;
-      free(current);
-      queue -> size--;
-      return process;
-    } else {
-      queue -> first = NULL;
-      queue -> last = NULL;
-      Process* process = current -> process;
-      free(current);
-      queue -> size--;
-      return process;
-    }
-    continua = 0;
-  }
+      Node* current = queue -> first;
+      Node* parent = current;
+      int continua = 1;
 
-  // Se recorren todos los nodos buscando un valor que haga match
-  // Este while no considera el ultimo nodo
-  while ((current -> next)&&(continua)){
+      // Aqui se evalua el caso en que el primer elemento de la cola necesita
+      // sacarse
+      if(current->process->pid == pid){
+        //printf("Entra test 1\n");
+        if (current -> next){
+          Node* hijo = current -> next;
+          queue -> first = hijo;
+          current -> next = NULL;
+          Process* process = current -> process;
+          free(current);
+          queue -> size--;
+          return process;
+        } else {
+          queue -> first = NULL;
+          queue -> last = NULL;
+          Process* process = current -> process;
+          free(current);
+          queue -> size--;
+          return process;
+        }
+        continua = 0;
+      }
 
-    // Aqui si es que un valor hace match, entonces se extrae el nodo
-    // y se agrega al final de la cola, esto se hace con redefinicion de punteros
-    if(current->process->pid == pid){
-      Node* hijo = current -> next;
-      parent -> next = hijo;
-      Process* process = current -> process;
-      free(current);
-      continua = 0;
-      queue -> size--;
-      return process;
-    }
-    if (continua){
-      parent = current;
-      Node* next = current -> next;
-      current = next;
-    }
-  }
+      // Se recorren todos los nodos buscando un valor que haga match
+      // Este while no considera el ultimo nodo
+      while ((current -> next)&&(continua)){
 
-  // Se chequea el último nodo
-  if (current -> process -> pid == pid){
-    queue -> last = parent;
-    Process* process = current -> process;
-    free(current);
-    queue -> size--;
-    return process;
+        // Aqui si es que un valor hace match, entonces se extrae el nodo
+        // y se agrega al final de la cola, esto se hace con redefinicion de punteros
+        if(current->process->pid == pid){
+          //printf("Entra test 2\n");
+          Node* hijo = current -> next;
+          parent -> next = hijo;
+          Process* process = current -> process;
+          free(current);
+          continua = 0;
+          queue -> size--;
+          return process;
+        }
+        if (continua){
+          //printf("Entra test 3\n");
+          parent = current;
+          Node* next = current -> next;
+          current = next;
+        }
+      }
+
+      // Se chequea el último nodo
+      if (current -> process -> pid == pid){
+        //printf("Entra test 4\n");
+        queue -> last = parent;
+        queue -> last -> next = NULL;
+        Process* process = current -> process;
+        free(current);
+        queue -> size--;
+        return process;
+      } else {
+        // Si es que no se encontro el pid en ningun nodo
+        return NULL;
+      }
+
+  // Este es el caso si la queue estaba vacia
   } else {
-    // Si es que no se encontro el pid en ningun nodo
     return NULL;
   }
+
 }
 
 
@@ -196,9 +209,9 @@ void queue_destroy(Queue* queue)
   // Libera iteretivamente los nodos
   if(queue -> first){
 
-    
 
-  
+
+
     Node* current = queue -> first;
     while (current)
     {
@@ -206,7 +219,7 @@ void queue_destroy(Queue* queue)
       Node* next = current -> next;
       free(current->process->arreglo);
       free(current->process);
-      
+
       free(current);
       current = next;
     }
@@ -219,22 +232,29 @@ void queue_destroy(Queue* queue)
 // Función de prueba para chequear que la cola esta bien implementada
 void queue_print(Queue* queue){
 
-  Node* current = queue -> first;
-  printf("\n[");
-  while (current -> next){
-    printf("%d,", current -> process -> pid);
 
-    Node* next = current -> next;
-    current = next;
+  if(queue -> first){
+    Node* current = queue -> first;
+    printf("\n[");
+    while (current -> next){
+      printf("%d,", current -> process -> pid);
+
+      Node* next = current -> next;
+      current = next;
+    }
+    printf("%d,", current -> process -> pid);
+    printf("]\n");
+    printf("Se termino el recorrido\n");
+  } else {
+    printf("[]\n");
   }
-  printf("%d,", current -> process -> pid);
-  printf("]\n");
-  printf("Se termino el recorrido\n");
+
+
 }
 
 // Esta funcion debe retornar el valor quantum
 int get_quantum(Queue* queue, int num_fabrica, int q_entregado){
-  // esta funcion asume que cuando será llamada se le entregará un n_fabrica que 
+  // esta funcion asume que cuando será llamada se le entregará un n_fabrica que
   // se encuentre en la fila, de lo contrario dará ERROR pq no se puede
   // dividir por 0
 
@@ -248,12 +268,12 @@ int get_quantum(Queue* queue, int num_fabrica, int q_entregado){
   int factory_present_1 = 0;
   int factory_present_2 = 0;
   int factory_present_3 = 0;
-  int factory_present_4 = 0;  
+  int factory_present_4 = 0;
 
   int continuar = 1;
   // Se recorren todos los nodos
-  while (continuar){ 
-    
+  while (continuar){
+
     //printf("\nProceso: %d - status: %i\n",current -> process -> pid,current -> process -> status);
     switch (current -> process -> n_fabrica) {
 
@@ -281,7 +301,7 @@ int get_quantum(Queue* queue, int num_fabrica, int q_entregado){
       }
       break;
 
-    default:  
+    default:
       //printf("Estoy en 4\n");
       factory_present_4 = 1;
       if (4 == num_fabrica){
@@ -289,8 +309,8 @@ int get_quantum(Queue* queue, int num_fabrica, int q_entregado){
       }
       break;
   }
-    
-    
+
+
     // Aqui se pasa al siguiente nodo
     if (current -> next){
       Node* next = current -> next;
@@ -299,14 +319,14 @@ int get_quantum(Queue* queue, int num_fabrica, int q_entregado){
     else{
       continuar = 0;
     }
-    
+
   }
 
   // estoy fuera del WHILE
-  
+
   int f = factory_present_1 + factory_present_2 + factory_present_3 + factory_present_4;
 
- 
+
   return (q_entregado/(f * n_i)) ;
 }
 
