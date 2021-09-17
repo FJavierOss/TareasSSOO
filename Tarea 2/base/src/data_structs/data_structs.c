@@ -194,14 +194,22 @@ Process* queue_pop(Queue* queue, int pid)
 void queue_destroy(Queue* queue)
 {
   // Libera iteretivamente los nodos
-  Node* current = queue -> first;
-  while (current)
-  {
-    Node* next = current -> next;
-    free(current->process->arreglo);
-    free(current->process);
-    free(current);
-    current = next;
+  if(queue -> first){
+
+    
+
+  
+    Node* current = queue -> first;
+    while (current)
+    {
+
+      Node* next = current -> next;
+      free(current->process->arreglo);
+      free(current->process);
+      
+      free(current);
+      current = next;
+    }
   }
 
   // Libera la cola
