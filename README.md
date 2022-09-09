@@ -1,2 +1,2 @@
-# TareasSSOO
-Tareas SSOO 2021-2
+# Tareas Sistemas Operativos y Redes UC
+El siguiente repositorio :smile:
